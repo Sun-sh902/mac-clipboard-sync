@@ -30,15 +30,21 @@ adopts the latest board content.
 
 ## Install
 
+Two steps. Step 1 installs the agent for the account you are in right now;
+step 2 adds every other local account you want to sync with.
+
 ```bash
-# current user only (no sudo needed)
+git clone https://github.com/Sun-sh902/mac-clipboard-sync.git
+cd mac-clipboard-sync
+
+# Step 1 — install for the current account (no sudo needed)
 ./install.sh
 
-# additionally install for other local accounts (needs sudo)
+# Step 2 — install for the other local accounts (needs sudo, run from any admin account)
 sudo ./install.sh alice bob
 ```
 
-What it sets up:
+What the installer sets up:
 
 | Path | Purpose |
 |---|---|
@@ -47,7 +53,62 @@ What it sets up:
 | `~/Library/LaunchAgents/com.local.clipboard-sync.plist` | per-user launchd agent (RunAtLoad, KeepAlive, Background priority) |
 
 Accounts that are logged in start syncing immediately; accounts that are not
-logged in start automatically at their next login.
+logged in start automatically at their next login. Everything survives
+reboots — the agents are plain launchd agents, no extra setup needed.
+
+## Usage
+
+Day to day there is nothing to learn — keep using ⌘C / ⌘V as usual:
+
+1. Copy text in any installed account (`⌘C`, or `echo hi | pbcopy`).
+2. Switch to another user via fast user switching
+   (user icon in the menu bar, or lock screen → pick the account; enable the
+   switcher under **System Settings → Control Center → Fast User Switching**
+   if it is not shown).
+3. Paste (`⌘V`) — the text is already there, within ~1–2 seconds.
+
+How accounts participate:
+
+- Sync runs between accounts that are **logged in**. A switched-out account
+  (fast user switching) stays logged in and keeps syncing.
+- An account that was fully **logged out** catches up with the latest board
+  content automatically the next time you log into it — macOS empties the
+  clipboard at logout, the agent refills it from the shared board.
+- Only text participates. Images and files don't sync (see
+  [Limitations](#limitations)).
+
+Verify that it works:
+
+```bash
+# in account A
+echo "sync-test-$(date +%s)" | pbcopy
+
+# a few seconds later, in account B
+cat /Users/Shared/.clipboard-sync/board   # should show the same text
+pbpaste                                   # should paste the same text
+```
+
+Check that the agents are running:
+
+```bash
+ps aux | grep clipboard-sync-agent | grep -v grep          # one line per logged-in account
+launchctl print gui/$(id -u)/com.local.clipboard-sync | grep state
+```
+
+If an account's agent is missing: log into that account once, then run
+`./install.sh` there (or `sudo ./install.sh <user>` from any admin account).
+
+## Troubleshooting
+
+- **Not syncing?** Confirm both accounts have the agent installed
+  (`ls ~/Library/LaunchAgents/com.local.clipboard-sync.plist` in each) and
+  running (commands above).
+- **Agent disabled?** Check
+  **System Settings → General → Login Items & Extensions → Allow in the
+  Background** — the `com.local.clipboard-sync` item must be enabled.
+- **Permission errors on the shared dir?** Restore it with:
+  `sudo chgrp staff /Users/Shared/.clipboard-sync && sudo chmod 2770 /Users/Shared/.clipboard-sync`
+- **Copied an image or file?** Only text syncs — that's by design.
 
 ## How it works
 
