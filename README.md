@@ -1,11 +1,14 @@
 # mac-clipboard-sync
 
-Sync the clipboard across **macOS user accounts on the same machine**.
+**Clipboard sync when you switch Mac users.** Copy text in one macOS account,
+switch to another user, paste — the clipboard is already there. While both
+accounts are logged in, anything you copy in one shows up in the other within
+~1–2 seconds, and a freshly logged-in account adopts the latest content
+automatically.
 
-macOS gives every login session its own isolated pasteboard, so when you use
-multiple local accounts (work / personal / review, fast user switching), each
-account starts with an empty clipboard and nothing you copy carries over.
-This project fixes that with ~60 lines of shell and a launchd agent.
+macOS gives every login session its own isolated pasteboard, so nothing you
+copy carries over between local accounts (work / personal / review, fast user
+switching). This project fixes that with ~60 lines of shell and a launchd agent.
 
 ```
 ┌──────────────┐   publish/pull    ┌─────────────────────────────┐   publish/pull    ┌──────────────┐
