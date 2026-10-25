@@ -41,7 +41,8 @@ cd mac-clipboard-sync
 ./install.sh
 
 # Step 2 — install for the other local accounts (needs sudo, run from any admin account)
-sudo ./install.sh alice bob
+# Replace <username> with each account's short name — list them with `ls /Users`
+sudo ./install.sh <username> [<username> ...]
 ```
 
 What the installer sets up:
@@ -153,9 +154,9 @@ cost nothing because their agent isn't running.
 ## Uninstall
 
 ```bash
-./uninstall.sh                      # remove the current user's agent
-sudo ./uninstall.sh alice bob       # remove other accounts' agents
-sudo ./uninstall.sh --purge alice   # ... and delete the shared board
+./uninstall.sh                                  # remove the current user's agent
+sudo ./uninstall.sh <username> [<username> ...] # remove other accounts' agents
+sudo ./uninstall.sh --purge <username>          # ... and delete the shared board
 ```
 
 If sync ever stops working, check **System Settings → General → Login Items &
